@@ -1,5 +1,8 @@
 package main
 
+import (
+	"fmt"
+)
 
 type memoryAddress uint16
 type memoryWord uint16
@@ -38,6 +41,9 @@ func runProgram(program program) {
 			return
 		case noop:
 			continue
+		case out:
+			char := program[pc + 1]
+			fmt.Print(string(char))
 		}
 	}
 }
