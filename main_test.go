@@ -2,9 +2,13 @@ package main
 
 import "testing"
 
-func TestStuff(t *testing.T) {
-	got := stuff()
-	if got != 0 {
-		t.Errorf("stuff() did not return 0, instead got: %d", got)
-	}
+func TestInstructionHalt(t *testing.T) {
+	program := make(program)
+	program[0] = halt
+	runProgram(program)
+}
+
+func TestEmptyProgramHalts(t *testing.T) {
+	program := make(program)
+	runProgram(program)
 }
