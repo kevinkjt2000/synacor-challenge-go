@@ -1,9 +1,13 @@
 package main
 
-type program map[int]uint16
+
+type memoryAddress uint16
+type memoryWord uint16
+
+type program map[memoryAddress]memoryWord
 
 const (
-	halt uint16 = iota
+	halt memoryWord = iota
 	set
 	push
 	pop
@@ -28,7 +32,7 @@ const (
 )
 
 func runProgram(program program) {
-	for pc := 0; ; pc++ {
+	for pc := memoryAddress(0); ; pc++ {
 		switch instruction := program[pc]; instruction {
 		case halt:
 			return
