@@ -29,9 +29,11 @@ const (
 
 func runProgram(program program) {
 	for pc := 0; ; pc++ {
-		instruction := program[pc]
-		if instruction == halt {
-			break
+		switch instruction := program[pc]; instruction {
+		case halt:
+			return
+		case noop:
+			continue
 		}
 	}
 }
