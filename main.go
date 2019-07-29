@@ -1,7 +1,10 @@
 package main
 
 import (
+	"bytes"
+	"encoding/binary"
 	"fmt"
+	"io/ioutil"
 )
 
 type memoryAddress uint16
@@ -42,10 +45,31 @@ func runProgram(program program) {
 		case noop:
 			continue
 		case out:
-			char := program[pc + 1]
+			char := program[pc+1]
 			fmt.Print(string(char))
 		}
 	}
 }
 
-func main() {}
+func loadProgram(filename string) program {
+	fileBytes, err := ioutil.ReadFile(filename)
+	if err != nil {
+		panic(err)
+	}
+
+	program := make(program)
+	r := bytes.NewReader(fileBytes)
+	var i memoryAddress
+	var data memoryWord
+	for err := binary.Read(r, binary.LittleEndian, &data); err == nil; err = binary.Read(r, binary.LittleEndian, &data) {
+		program[i] = memoryWord(data)
+		i++
+	}
+
+	return program
+}
+
+func main() {
+	program := loadProgram("challenge.bin")
+	runProgram(program)
+}

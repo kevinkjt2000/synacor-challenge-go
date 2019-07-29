@@ -18,8 +18,8 @@ func init() {
 
 func TestInstructionOut(t *testing.T) {
 	rescueStdout := os.Stdout
-  r, w, _ := os.Pipe()
-  os.Stdout = w
+	r, w, _ := os.Pipe()
+	os.Stdout = w
 
 	program := program{
 		0: out,
@@ -28,9 +28,9 @@ func TestInstructionOut(t *testing.T) {
 	runProgram(program)
 
 	w.Close()
-  out, _ := ioutil.ReadAll(r)
-  os.Stdout = rescueStdout
-  if string(out) != "h" {
+	out, _ := ioutil.ReadAll(r)
+	os.Stdout = rescueStdout
+	if string(out) != "h" {
 		t.Errorf("Expected 'h', got: %s", string(out))
 	}
 }
