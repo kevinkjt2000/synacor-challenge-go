@@ -37,18 +37,22 @@ const (
 	noop
 )
 
+func getVal(memory program, addr memoryAddress) memoryWord {
+	return memory[addr]
+}
+
 func runProgram(memory program) {
 	for pc := memoryAddress(0); ; {
-		switch instruction := memory[pc]; instruction {
+		switch instruction := getVal(memory, pc); instruction {
 		case halt:
 			return
 		case jmp:
-			pc = memoryAddress(memory[pc+1])
+			pc = memoryAddress(getVal(memory, pc+1))
 		case noop:
 			pc++
 			continue
 		case out:
-			char := memory[pc+1]
+			char := getVal(memory, pc+1)
 			pc += 2
 			fmt.Print(string(char))
 		}
