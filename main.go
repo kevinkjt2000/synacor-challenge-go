@@ -37,18 +37,18 @@ const (
 	noop
 )
 
-func runProgram(program program) {
+func runProgram(memory program) {
 	for pc := memoryAddress(0); ; {
-		switch instruction := program[pc]; instruction {
+		switch instruction := memory[pc]; instruction {
 		case halt:
 			return
 		case jmp:
-			pc = memoryAddress(program[pc+1])
+			pc = memoryAddress(memory[pc+1])
 		case noop:
 			pc++
 			continue
 		case out:
-			char := program[pc+1]
+			char := memory[pc+1]
 			pc += 2
 			fmt.Print(string(char))
 		}

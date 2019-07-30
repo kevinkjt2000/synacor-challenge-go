@@ -16,6 +16,29 @@ func init() {
 	go panicOnTimeout()
 }
 
+func TestJumpInstruction(t *testing.T) {
+	rescueStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	program := program{
+		0: jmp,
+		1: 4,
+		2: out,
+		3: memoryWord('n'),
+		4: out,
+		5: memoryWord('y'),
+	}
+	runProgram(program)
+
+	w.Close()
+	out, _ := ioutil.ReadAll(r)
+	os.Stdout = rescueStdout
+	if string(out) != "y" {
+		t.Errorf("Expected 'y', got: %s", string(out))
+	}
+}
+
 func TestInstructionOut(t *testing.T) {
 	rescueStdout := os.Stdout
 	r, w, _ := os.Pipe()
