@@ -38,14 +38,18 @@ const (
 )
 
 func runProgram(program program) {
-	for pc := memoryAddress(0); ; pc++ {
+	for pc := memoryAddress(0); ; {
 		switch instruction := program[pc]; instruction {
 		case halt:
 			return
+		case jmp:
+			pc = memoryAddress(program[pc+1])
 		case noop:
+			pc++
 			continue
 		case out:
 			char := program[pc+1]
+			pc += 2
 			fmt.Print(string(char))
 		}
 	}
