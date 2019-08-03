@@ -21,15 +21,8 @@ func TestJumpInstruction(t *testing.T) {
 	r, w, _ := os.Pipe()
 	os.Stdout = w
 
-	program := program{
-		0: jmp,
-		1: 4,
-		2: out,
-		3: memoryWord('n'),
-		4: out,
-		5: memoryWord('y'),
-	}
-	runProgram(program)
+	m := newTestMachine([]byte{byte(jmp), 0, 4, 0, byte(out), 0, 'n', 0, byte(out), 0, 'y', 0})
+	m.RunProgram()
 
 	w.Close()
 	out, _ := ioutil.ReadAll(r)
@@ -44,11 +37,8 @@ func TestInstructionOut(t *testing.T) {
 	r, w, _ := os.Pipe()
 	os.Stdout = w
 
-	program := program{
-		0: out,
-		1: memoryWord('h'),
-	}
-	runProgram(program)
+	m := newTestMachine([]byte{byte(out), 0, 'h', 0})
+	m.RunProgram()
 
 	w.Close()
 	out, _ := ioutil.ReadAll(r)
@@ -59,13 +49,11 @@ func TestInstructionOut(t *testing.T) {
 }
 
 func TestInstructionHalt(t *testing.T) {
-	program := program{
-		0: halt,
-	}
-	runProgram(program)
+	m := newTestMachine([]byte{byte(halt), 0})
+	m.RunProgram()
 }
 
 func TestEmptyProgramHalts(t *testing.T) {
-	program := program{}
-	runProgram(program)
+	m := newTestMachine([]byte{})
+	m.RunProgram()
 }

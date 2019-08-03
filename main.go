@@ -10,8 +10,6 @@ import (
 type memoryAddress uint16
 type memoryWord uint16
 
-type program map[memoryAddress]memoryWord
-
 const (
 	halt memoryWord = iota
 	set
@@ -37,47 +35,75 @@ const (
 	noop
 )
 
-func getVal(memory program, addr memoryAddress) memoryWord {
-	return memory[addr]
+type machine struct {
+	memory map[memoryAddress]memoryWord
+	pc     memoryAddress
 }
 
-func runProgram(memory program) {
-	for pc := memoryAddress(0); ; {
-		switch instruction := getVal(memory, pc); instruction {
+func newMachine(filename string) *machine {
+	var m machine
+	m.memory = make(map[memoryAddress]memoryWord)
+	fileBytes := m.ReadProgramFromFile(filename)
+	m.LoadProgramIntoMemory(fileBytes)
+	return &m
+}
+
+func newTestMachine(bytes []byte) *machine {
+	var m machine
+	m.memory = make(map[memoryAddress]memoryWord)
+	m.LoadProgramIntoMemory(bytes)
+	return &m
+}
+
+func (m *machine) GetVal(addr memoryAddress) memoryWord {
+	return m.memory[addr]
+}
+
+func (m *machine) SetVal(addr memoryAddress, val memoryWord) {
+	m.memory[addr] = val
+}
+
+func (m *machine) RunProgram() {
+	for {
+		switch instruction := m.GetVal(m.pc); instruction {
 		case halt:
 			return
 		case jmp:
-			pc = memoryAddress(getVal(memory, pc+1))
+			m.pc = memoryAddress(m.GetVal(m.pc + 1))
 		case noop:
-			pc++
+			m.pc++
 			continue
 		case out:
-			char := getVal(memory, pc+1)
-			pc += 2
+			char := m.GetVal(m.pc + 1)
+			m.pc += 2
 			fmt.Print(string(char))
 		}
 	}
 }
 
-func loadProgram(filename string) program {
+func (m *machine) LoadProgramIntoMemory(fileBytes []byte) {
+	r := bytes.NewReader(fileBytes)
+	var i memoryAddress
+	for data, err := parseNextMemoryWord(r); err == nil; data, err = parseNextMemoryWord(r) {
+		m.SetVal(i, data)
+		i++
+	}
+}
+
+func parseNextMemoryWord(r *bytes.Reader) (ret memoryWord, err error) {
+	err = binary.Read(r, binary.LittleEndian, &ret)
+	return
+}
+
+func (m *machine) ReadProgramFromFile(filename string) []byte {
 	fileBytes, err := ioutil.ReadFile(filename)
 	if err != nil {
 		panic(err)
 	}
-
-	program := make(program)
-	r := bytes.NewReader(fileBytes)
-	var i memoryAddress
-	var data memoryWord
-	for err := binary.Read(r, binary.LittleEndian, &data); err == nil; err = binary.Read(r, binary.LittleEndian, &data) {
-		program[i] = memoryWord(data)
-		i++
-	}
-
-	return program
+	return fileBytes
 }
 
 func main() {
-	program := loadProgram("challenge.bin")
-	runProgram(program)
+	m := newMachine("challenge.bin")
+	m.RunProgram()
 }
