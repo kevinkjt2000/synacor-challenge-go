@@ -16,12 +16,20 @@ func init() {
 	go panicOnTimeout()
 }
 
+func assemble(words ...memoryWord) []byte {
+	ret := make([]byte, len(words) * 2)
+	for i, word := range words {
+		ret[i*2] = byte(word)
+	}
+	return ret
+}
+
 func TestJumpInstruction(t *testing.T) {
 	rescueStdout := os.Stdout
 	r, w, _ := os.Pipe()
 	os.Stdout = w
 
-	m := newTestMachine([]byte{byte(jmp), 0, 4, 0, byte(out), 0, 'n', 0, byte(out), 0, 'y', 0})
+	m := newTestMachine(assemble(jmp, 4, out, 'n', out, 'y'))
 	m.RunProgram()
 
 	w.Close()
@@ -37,7 +45,7 @@ func TestInstructionOut(t *testing.T) {
 	r, w, _ := os.Pipe()
 	os.Stdout = w
 
-	m := newTestMachine([]byte{byte(out), 0, 'h', 0})
+	m := newTestMachine(assemble(out, 'h'))
 	m.RunProgram()
 
 	w.Close()
@@ -49,11 +57,11 @@ func TestInstructionOut(t *testing.T) {
 }
 
 func TestInstructionHalt(t *testing.T) {
-	m := newTestMachine([]byte{byte(halt), 0})
+	m := newTestMachine(assemble(halt))
 	m.RunProgram()
 }
 
 func TestEmptyProgramHalts(t *testing.T) {
-	m := newTestMachine([]byte{})
+	m := newTestMachine(assemble())
 	m.RunProgram()
 }
